@@ -1,24 +1,24 @@
 {
-  "name": "h3-compression",
+  "name": "h3-fast-compression",
   "type": "module",
   "version": "0.3.3",
   "packageManager": "pnpm@8.7.0",
   "description": "Adds compression to h3 request (brotli, gzip, deflate)",
   "author": {
-    "name": "Gregor Becker",
-    "email": "gregor@codedredd.de"
+    "name": "Timothée Gonnet",
+    "email": "timothee.freelance@gmail.com"
   },
   "license": "MIT",
-  "funding": "https://github.com/sponsors/codedredd",
-  "homepage": "https://github.com/CodeDredd/h3-compression#readme",
+  "homepage": "https://github.com/TimGonnet/h3-fast-compression#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CodeDredd/h3-compression.git"
+    "url": "git+https://github.com/TimGonnet/h3-fast-compression.git"
   },
-  "bugs": "https://github.com/CodeDredd/h3-compression/issues",
+  "bugs": "https://github.com/TimGonnet/h3-fast-compression/issues",
   "keywords": [
     "h3",
     "h3-compression",
+    "h3-fast-compression",
     "gzip",
     "brotli",
     "deflate",

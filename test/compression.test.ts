@@ -13,7 +13,7 @@ describe('use compression', () => {
     app = createApp({ debug: true, onBeforeResponse: useCompression })
     app.use('/', eventHandler({
       handler: () => {
-        return '<h1>Hello World</h1>'
+        return '<h1>Hello World</h1>'.repeat(100)
       },
     }))
     request = supertest(toNodeListener(app))

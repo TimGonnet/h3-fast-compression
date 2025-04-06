@@ -1,12 +1,18 @@
 import { promisify } from 'node:util'
 import zlib from 'node:zlib'
-import { Buffer } from 'node:buffer'
+import type { Buffer } from 'node:buffer'
 import type { H3Event } from 'h3'
 import {
   getRequestHeader,
+  getResponseHeader,
   send,
   setResponseHeader,
 } from 'h3'
+
+/**
+ * Minimum of 1024 bytes are recommend to enable compression, below input string can be smaller than output
+ */
+const MINIMUM_COMPRESSION_INPUT_SIZE = 1024
 
 export interface RenderResponse {
   body: string | unknown
@@ -30,14 +36,33 @@ export function getAnyCompression(event: H3Event) {
 }
 
 export async function compress(event: H3Event, response: Partial<RenderResponse>, method: 'gzip' | 'deflate' | 'br') {
-  const compression = promisify(zlib[method === 'br' ? 'brotliCompress' : method])
-  const acceptsEncoding = getRequestHeader(event, 'accept-encoding')?.includes(
-    method,
-  )
+  const acceptEncoding = getRequestHeader(event, 'accept-encoding')?.includes(method)
+  const contentEncoding = getResponseHeader(event, 'content-encoding')
+  const responseBody = response.body
 
-  if (acceptsEncoding && typeof response.body === 'string') {
+  const shouldCompress
+    = typeof responseBody === 'string'
+    // Do not compress already compressed response (such as assets already compressed by nitro)
+    && !contentEncoding
+    && responseBody.length >= MINIMUM_COMPRESSION_INPUT_SIZE
+    && acceptEncoding
+
+  if (shouldCompress) {
     setResponseHeader(event, 'Content-Encoding', method)
-    send(event, await compression(Buffer.from(response.body)))
+
+    const compressed: Buffer = await (
+      method === 'br'
+        ? promisify(zlib.brotliCompress)(responseBody, {
+          params: {
+            [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
+            // 4 is generally more appropriate for dynamic content, faster than gzip and better compression ratio
+            [zlib.constants.BROTLI_PARAM_QUALITY]: 4,
+          },
+        })
+        : promisify(zlib[method])(responseBody)
+    )
+
+    void send(event, compressed)
   }
 }
 
