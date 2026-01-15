@@ -63,9 +63,9 @@ app.use(
 listen(toNodeListener(app))
 ```
 
-## Nuxt 3
+## Nuxt 3 & 4
 
-If you want to use it in nuxt 3 you can define a nitro plugin.
+If you want to use it in Nuxt you can define a nitro plugin.
 
 `server/plugins/compression.ts`
 ````ts
@@ -74,7 +74,7 @@ import { useCompression } from 'h3-compression'
 export default defineNitroPlugin((nitro) => {
   nitro.hooks.hook('render:response', async (response, { event }) => {
     // Skip internal nuxt routes (e.g. error page)
-    if (getRequestURL(event).pathname.startsWith('/_nuxt'))
+    if (['/_nuxt', '/__nuxt'].some(prefix => getRequestURL(event).pathname.startsWith(prefix)))
       return
 
     if (!response.headers?.['content-type']?.startsWith('text/html'))
